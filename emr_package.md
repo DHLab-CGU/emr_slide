@@ -31,6 +31,7 @@ head(sample_MIMICIII,5)
 |          2|  163353|      3|       3|V290      |2138-07-17 |NEWBORN        |NEWBORN   |
 |          5|  178980|     22|       1|V3000     |2103-02-02 |NEWBORN        |NEWBORN   |
 |          5|  178980|     23|       2|V053      |2103-02-02 |NEWBORN        |NEWBORN   |
+
 Method
 ========================================================
 - The mechanism of *emr* package:
@@ -368,6 +369,7 @@ admissionDate[grep("0$",ID),]
 |C0  |2015-12-05      |2025-02-21    |
 |B0  |2015-12-26      |2024-02-12    |
 |D0  |2017-01-29      |2025-04-08    |
+
 Index date
 ========================================================
 - These records can be used for a given patient as an index date for **data split** function.

@@ -30,6 +30,7 @@ head(sample_MIMICIII,5)
 ```{r, echo=FALSE}
 kable(head(sample_MIMICIII,5))
 ```
+
 Method
 ========================================================
 - The mechanism of *emr* package:
@@ -287,6 +288,7 @@ admissionDate[grep("0$",ID),]
 admissionDate <- patientRecordDate(sampleDxFile, ID, ICD, Date)
 kable(admissionDate[grep("0$",ID),])
 ```
+
 Index date
 ========================================================
 - These records can be used for a given patient as an index date for **data split** function.

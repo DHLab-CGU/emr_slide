@@ -1,0 +1,20 @@
+Backup
+========================================================
+author: 
+date: 
+autosize: true
+
+
+2. Data integration: condition era
+========================================================
+- Integrate distributed data of clinical records into a single progression record
+- isDescription: Category or description of standard classification methods 
+
+
+
+
+
+```
+Error in getConditionEra(sampleDxFile, ID, ICD, Date, "2015-10-01", ccs,  : 
+  could not find function "getConditionEra"
+```

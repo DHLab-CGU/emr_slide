@@ -1,7 +1,7 @@
 Diagnosis and procedure data analysis - emr package in R
 ========================================================
 author: Hsiang-Ju Chiu and Yi-Ju Tseng @ Chang Gung University
-date: 2019/08/22
+date: 2019/08/23
 autosize: true
 font-family: 'Microsoft JhengHei'
 navigation: slide
@@ -48,7 +48,7 @@ type:section
 
 RStudio Interface
 ========================================================
-left: 30%
+left: 40%
 4 Blocks in RStudio：
 
 - Source editor  -> edit the codes here
@@ -67,7 +67,7 @@ R and R Packages
 
 R : Core (iPhone)
 
-```{r echo=FALSE,height=7}
+```{r echo=FALSE,out.height = "500px"}
 knitr::include_graphics("https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-xr-white-select-201809?wid=940&hei=1112&fmt=png-alpha&qlt=80&.v=1551226036668")
 ```
 
@@ -85,12 +85,12 @@ knitr::include_graphics("https://3c.yipee.cc/wp-content/uploads/2019/06/a7ffbaa3
 
 R = Base + Other Packages
 ========================================================
-- How to install packages
+- How to install packages?
 ```{r eval=F}
 install.packages("Package name")
 ```
 
-- How to load the installed packages
+- How to load the installed packages?
 ```{r eval=F}
 library(Package name)
 ```
@@ -100,11 +100,11 @@ Functions - Basic
 ========================================================
 - Basic functions
 - Functions provided by packages (such as *emr*)
-- `function_name(argument1,argument2,....)`
+- `function_name(argument1, argument2,....)`
 
 For example, we can get the average of numbers by `mean()` function:
 ```{r}
-mean(c(1,2,3,4,5,6)) ##averages of 1~6
+mean(c(1,2,3,4,5,6)) ##average of 1~6
 ```
 
 Functions - Arguments
@@ -113,7 +113,7 @@ Functions - Arguments
 If you don't know the defined order, you can assign the arguments by name
 
 ```{r}
-seq(from=1,to=9,by=2)#1~9，每隔2產生一數字
+seq(from=1,to=9,by=2)
 ```
 
 
@@ -121,7 +121,7 @@ Back to emr package
 ========================================================
 type:section
 
-How to install?
+How to install emr package?
 ========================================================
 - Not on CRAN right now
 - Install from GitHub (by *devtools* package)
@@ -159,62 +159,150 @@ if(!require(tableone)){
 }
 ```
 
+PDA vs. non-PDA in MIMIC-III - a Use case
+========================================================
+type:section
+
+
+Final goals of this tutorial
+========================================================
+Explore the comorbidity or underlying diseases difference between **patent ductus arteriosus (PDA)** and the **non-PDA** patients
+
+
 Demo data
 ========================================================
-- We provided a sample file `sampleFile_MIMIC` obtained from [MIMIC-III](https://www.nature.com/articles/sdata201635), a medical dataset of 7,833 newborn patients with 45,674 admissions.
-- This dataset used for verifying the comorbidity difference between the patients with **patent ductus arteriosus (PDA)** and the **non-PDA** patients by *emr* package.
+- Sample file `sampleFile_MIMIC`
+- [MIMIC-III](https://www.nature.com/articles/sdata201635), a dataset of 7,833 newborn patients with 45,674 admissions
 ```{r, eval=FALSE}
-head(sample_MIMICIII,5)
+head(sample_MIMICIII)
 ```
 ```{r, echo=FALSE}
-kable(head(sample_MIMICIII,5))
+kable(head(sample_MIMICIII))
 ```
 
-Method
+Steps to accomplish the goals
 ========================================================
-- The mechanism of *emr* package:
+1. Select PDA case
+2. Group diagnosis records
+3. Visualize the diagnosis records
+4. Generate "Table 1" for the analysis
 
-    - Code standardization
 
-    - Data Integration
-
-    - Exploratory data analysis (EDA) preparation
-
-    - Visualization
-
-PDA case selection
+1. PDA case selection
 ========================================================
-- We conducted **comorbidities analyses** based on a cohort of newborns from MIMIC-III by using *emr* package and tableone package.
-- First, we separate the newborn (n = 7,833) into case (PDA) and control (non-PDA):
+- Split the newborns (n = 7,833) into case (PDA) and control (non-PDA) groups:
   - PDA: 381
   - non-PDA: 7452
 
-PDA case selection
+1. PDA case selection
 ========================================================
+```{r}
+selectedPDA <- 
+  selectCases(sample_MIMICIII, 
+              SUBJECT_ID, ICD9_CODE, 
+              ADMITTIME, "2015/10/01", 
+              ICD, caseCondition = "^7470", 
+              caseCount = 1, 
+              CaseName = "PDA")
+```
 ```{r, eval = FALSE}
-selectedPDA <- selectCases(sample_MIMICIII, SUBJECT_ID, ICD9_CODE, ADMITTIME, "9999/01/01", ICD, caseCondition = "^7470", caseCount = 1, CaseName = "PDA")
-selectedPDA[379:383]
+selectedPDA
 ```
 ```{r, echo = FALSE}
-selectedPDA <- selectCases(sample_MIMICIII, SUBJECT_ID, ICD9_CODE, ADMITTIME, "9999/01/01", ICD, caseCondition = "^7470", caseCount = 1, CaseName = "PDA")
 kable(selectedPDA[379:383])
 ```
 
-EDA preparation
+1. PDA case selection - arguments
 ========================================================
-- Group diagnostic codes with Elixhauser comorbidity by *emr* package.
-- Convert the long format of grouped data into a **wide** format.
-
+- DxDataFile: sample_MIMICIII
+- idColName: SUBJECT_ID
+- icdColName: ICD9_CODE
+- dateColName: ADMITTIME
 ```{r, eval = FALSE}
-elix <- groupedDataLongToWide(sample_MIMICIII, SUBJECT_ID, ICD9_CODE,ADMITTIME, "9999-10-01", groupDataType = Elix, isDescription = F, selectedCaseFile = selectedPDA)
-elix[17:21,c(1,14:19)]
+selectedPDA <- 
+  selectCases(sample_MIMICIII, 
+              SUBJECT_ID, ICD9_CODE, 
+              ADMITTIME, "2015/10/01", 
+              ICD, caseCondition = "^7470", 
+              caseCount = 1, 
+              CaseName = "PDA")
+```
+
+1. PDA case selection - arguments
+========================================================
+- icd10usingDate: 2015/10/01
+- groupDataType: ICD (CCS, AHRQ, PheWAS...)
+- caseCount: 1
+- CaseName = "PDA"
+```{r, eval = FALSE}
+selectedPDA <- 
+  selectCases(sample_MIMICIII, 
+              SUBJECT_ID, ICD9_CODE, 
+              ADMITTIME, "2015/10/01", 
+              ICD, caseCondition = "^7470", 
+              caseCount = 1, 
+              CaseName = "PDA")
+```
+
+1. PDA case selection - check original data
+========================================================
+```{r, eval = FALSE}
+selectedPDA
 ```
 ```{r, echo = FALSE}
-elix <- groupedDataLongToWide(sample_MIMICIII, SUBJECT_ID, ICD9_CODE, ADMITTIME, "9999-10-01",groupDataType = Elix, isDescription = F, selectedCaseFile = selectedPDA)
-kable(elix[17:21,c(1,14:19)])
+kable(selectedPDA[379])
+```
+```{r, eval = FALSE}
+sample_MIMICIII[SUBJECT_ID=="32433"&
+                        grepl("^747",ICD9_CODE)]
+```
+```{r, echo = FALSE}
+kable(sample_MIMICIII[SUBJECT_ID=="32433"&
+                        grepl("^747",ICD9_CODE),
+                      list(SUBJECT_ID,ICD9_CODE,ADMITTIME)])
 ```
 
-Result by emr: histogram plot for comorbidity
+Demo data
+========================================================
+```{r, eval=FALSE}
+sample_MIMICIII[1:6,
+                c("SUBJECT_ID", 
+                  "ICD9_CODE", "ADMITTIME")]
+```
+```{r, echo=FALSE}
+kable(sample_MIMICIII[1:6,
+                      c("SUBJECT_ID", 
+                  "ICD9_CODE", "ADMITTIME")])
+```
+
+2. Group diagnosis records
+========================================================
+- Group diagnostic codes with Elixhauser comorbidity
+- Convert the long format of data into a **wide** format
+- Arguments:
+  - groupDataType: Elix (AHRQ, CCS)
+  - isDescription: F (T)
+  - selectedCaseFile: selectedPDA (From case select step)
+```{r}
+elix <- 
+  groupedDataLongToWide(
+    sample_MIMICIII,SUBJECT_ID,
+    ICD9_CODE,ADMITTIME, 
+    "9999-10-01", groupDataType = Elix, 
+    isDescription = F, 
+    selectedCaseFile = selectedPDA)
+```
+
+2. Group diagnosis records
+========================================================
+```{r, eval = FALSE}
+elix
+```
+```{r, echo = FALSE}
+kable(elix[17:21,c(1,15:19)])
+```
+
+3. Visualize the diagnosis records: histogram for comorbidity
 ========================================================
 ```{r, eval = TRUE, out.width ="50%"}
 plot_Elixhauser <- plot_groupedData(elix)
@@ -222,7 +310,7 @@ plot_Elixhauser$graph
 ```
 
 
-Result by emr: significant comorbidity category
+3. Visualize the diagnosis records: significantly different comorbidities
 ========================================================
 ```{r, eval = FALSE}
 plot_Elixhauser$sigCate
@@ -231,12 +319,17 @@ plot_Elixhauser$sigCate
 kable(plot_Elixhauser$sigCate)
 ```
 
-Result by tableone 
+4. Generate "Table 1" for the analysis
 ========================================================
 ```{r, eval = FALSE}
-var_col <- names(elix)[2:(length(elix)-1)]
-table_Elix <- CreateTableOne(vars = var_col,strata = "selectedCase", data = as.data.frame(elix), factorVars = var_col)
-table_Elix[c(1,3,4,8,10:12,14,17),]
+var_col <- 
+  names(elix)[2:(length(elix)-1)]
+table_Elix <- 
+  CreateTableOne(vars = var_col,
+                 strata = "selectedCase", 
+                 data = as.data.frame(elix), 
+                 factorVars = var_col)
+table_Elix
 ```
 ```{r,echo = FALSE}
 var_col <- names(elix)[2:(length(elix)-1)]
@@ -245,28 +338,29 @@ table <- print(table_Elix,quote = T,noSpaces = TRUE, printToggle = FALSE)
 kable(table[c(1,3,4,8,10:12,14,17),])
 ```
 
-Runtime for result
+
+Closer view of emr package
 ========================================================
- - Data: 7,833 newborn patients with 45,674 admissions.
-    - Code standardization: 1.1 secs
-    - Data integration (including code standardization) 
-        - code classification: 1.2 secs
-        - case selection: 1.5 secs
-    - EDA preparation: 1.8 secs
-    - Visualization: 0.2 secs
+type:section
 
+Overview of emr package
+========================================================
+1. Code standardization
+2. Data integration
+3. Exploratory data analysis (EDA) preparation
+4. Visualization
 
-Overview
+Overview of emr package
 ========================================================
 ```{r, echo=FALSE}
    knitr::include_graphics('./overview.jpg')
 ```
 
 
-Data: sample file
+Data: another sample data
 ========================================================
-- This sample file is used for illustrating the main functions of *emr* package.
-- The data is a simulated medical data set of 38 patients with 300 records.
+- For illustrating the main functions of *emr* package
+- Simulated medical data set of 38 patients with 300 records
 ```{r, eval=FALSE}
 sampleDxFile[6:10]
 ```
@@ -274,31 +368,23 @@ sampleDxFile[6:10]
 kable(sampleDxFile[6:10])
 ```
 
-Method
+
+
+ICD formats
 ========================================================
-- The mechanism of *emr* package:
-
-    - Code standardization
-
-    - Data Integration
-
-    - Exploratory data analysis (EDA) preparation
-
-    - Visualization
-
-ICD format
-========================================================
-- *emr* R package first standardized the ICD (International Classification of Diseases) codes into a **uniform format** before code classification.
+- Standardize the ICD codes into a **uniform format** before analysis
+  - short format: xxxyy
+  - decimal format: xxx**.**yy
 
 | ICD code  |         ICD-9          |        ICD-10          |
 |----------:|-----------------------:|:-----------------------|
-|**Diagnostic** |short and decimal format|short and decimal format|
+|**Diagnosis** |short and decimal format|short and decimal format|
 |Procedure  |short and decimal format|     only decimal format|
 
-ICD format in grouping methods
+Why we need to convert the ICD formats?
 ========================================================
-- Since the formats of ICD code used in the grouping tables could be different.
-- The transformational type is according to the grouping method chosen by users.  
+- The formats of ICD used in the grouping tables could be different
+- Already integrated into grouping method  
 
 |                 ICD code                |  ICD format  |Code standardization|
 |----------------------------------------:|-------------:|-------------------:|
@@ -307,44 +393,47 @@ ICD format in grouping methods
 |                              Comorbidity|short format  | IcdDxDecimalToShort|
 
 
-Code standardization
+1. Code standardization
 ========================================================
-- We transform the diagnosis codes into uniform format before the integration process.
-- Standardize the correctness of ICD codes:  
-    - **Uniform format** 
-    - **Display clear warning messages**  
-    
-    Help researchers to identify the potential coding error that may affect clinical data analysis.
+type:sub-section
+- Transform the diagnosis codes into **uniform** format before analysis
+- Check the correctness of ICD codes: with **clear warning messages** 
+  - Help researchers identify the potential coding error that may affect analysis
 
 
-Code standardization: short or decimal format
+1. Code standardization: short or decimal format
 ========================================================
 - Uniform code format functions:
     - Decimal format: `IcdDxShortToDecimal`
     - Short format: `IcdDxDecimalToShort`
     
-Code standardization: short or decimal format
+1. Code standardization: short or decimal format
 ========================================================    
+```{r}
+decimal <- 
+  IcdDxShortToDecimal(sampleDxFile, ICD, 
+                      Date, "2015/10/01")
+short <- 
+  IcdDxDecimalToShort(sampleDxFile, ICD, 
+                      Date, "2015/10/01")
+```
 ```{r, eval=FALSE}
-decimal <- IcdDxShortToDecimal(sampleDxFile, ICD, Date, "2015/10/01")
-short <- IcdDxDecimalToShort(sampleDxFile, ICD, Date, "2015/10/01")
-cbind(decimal = decimal$ICD[6:10], short = short$ICD[6:10])
+cbind(decimal = decimal$ICD[6:10], 
+      short = short$ICD[6:10])
 ```
 ```{r, echo=FALSE}
-decimal <- IcdDxShortToDecimal(sampleDxFile, ICD, Date, "2015/10/01")
-short <- IcdDxDecimalToShort(sampleDxFile, ICD, Date, "2015/10/01")
 kable(cbind(decimal = decimal$ICD[6:10], short = short$ICD[6:10]))
 ```
 
-Code standardization: warning message
+1. Code standardization: warning message
 ========================================================
-- Warning message: help users identify the potential coding error.
+- Warning message: identify the potential coding error
 - There are two types of warning message:
     -	wrong ICD code format
     - wrong ICD code version
-- The **suggestoin** helps user adjust the incorrect ICD-9 code with **unspecified** classification (Now only ICD-9 codes has suggestion).    
+- The **suggestoin** helps user adjust the incorrect ICD-9 code with **unspecified** classification (now only ICD-9 codes has suggestion).    
 
-Code standardization: warning message
+1. Code standardization: warning message
 ========================================================
 ```{r, eval=FALSE}
 decimal$Error
@@ -354,14 +443,17 @@ decimal$Error
 kable(decimal$Error)
 ```    
 
-Data Integration
+2. Data integration
 ========================================================
+type:sub-section
+
 - We provide four strategies to **group** EHR diagnostic code.
 
-- After code grouping, this package provides functions for **querying matching cases**, **splitting data** and **calculating condition era** by grouped categories of each patients. 
+- After grouping, this package provides functions for **querying matching cases**, **splitting data** and **generating condition era**  
 
-Data Integration
+2. Data integration
 ========================================================
+
 Integrated EHR data: 
  1. Code classification
  2. Case selection
@@ -369,7 +461,7 @@ Integrated EHR data:
  4. Data split
  5. Condition era calculation
 
-Data Integration: code classification
+2. Data integration: code classification
 ========================================================
 - Four strategies to group EHR diagnosis codes:
    - **CCS**
@@ -377,137 +469,199 @@ Data Integration: code classification
           - `IcdDxToCCSLvl()`
    - **PheWAS**: `IcdDxToPheWAS()`
    - **Comorbidity** (Elixhauser, AHRQ, and Charlson): `IcdDxToComorbid()` 
-    - **Customized defined grouping methods**:
+    - **Customized grouping methods**:
           - `IcdDxToCustom()`
           - `IcdDxToCustomGrep()`
  
-Data Integration: code classification
+2. Code classification - CCS
+======================================================== 
+```{r echo=FALSE}
+knitr::include_graphics("emr_package-figure/CCS.PNG")
+```
+
+2. Code classification - PheWAS
+======================================================== 
+```{r echo=FALSE}
+knitr::include_graphics("emr_package-figure/PheWAS.PNG")
+```
+
+2. Code classification - Comorbidity
+======================================================== 
+```{r echo=FALSE}
+knitr::include_graphics("emr_package-figure/AHRQ.PNG")
+```
+ 
+2. Data integration: code classification
 ========================================================
-- Standardization grouping long data by CCS multiple level 2.
+- Grouped data by CCS multiple level 2
+```{r}
+CCSlvl <- 
+  IcdDxToCCSLvl(sampleDxFile, 
+                ID, ICD, Date, 
+                "2015-10-01", 2)
+```
 ```{r,eval=FALSE}
-CCSlvl <- IcdDxToCCSLvl(sampleDxFile, ID, ICD, Date, "2015-10-01", 2)
-head(CCSlvl$groupedDT, 3)
+CCSlvl$groupedDT
 ```
 ```{r,echo=FALSE}
-CCSlvl <- IcdDxToCCSLvl(sampleDxFile, ID, ICD, Date, "2015-10-01", 2)
-kable(head(CCSlvl$groupedDT, 3))
+kable(head(CCSlvl$groupedDT))
 ```
 
-Data Integration: code classification
+2. Data integration: code classification
 ========================================================
-- Standardization grouping **summarised** long data by CCS multiple level 2.
+- **Summarised** grouped data by CCS multiple level 2
 ```{r,eval=FALSE}
-head(CCSlvl$summarised_groupedDT, 3)
+CCSlvl$summarised_groupedDT
 ```
 ```{r,echo=FALSE}
-kable(head(CCSlvl$summarised_groupedDT, 3))
+kable(head(CCSlvl$summarised_groupedDT))
 ```
 
-
-Data Integration: case selection
+2. Data integration: code classification
 ========================================================
-- Query the matching defined conditions cases.
+- Grouped data by CCS single level
+```{r}
+CCS <- 
+  IcdDxToCCS(sampleDxFile, 
+                ID, ICD, Date, 
+                "2015-10-01")
+```
 ```{r,eval=FALSE}
-case <- selectCases(sampleDxFile, ID, ICD, Date, "2015/10/01", ccslvl2, caseCondition = "Diseases of the urinary system", caseCount = 1, CaseName = "Selected")
+CCS$groupedDT
+```
+```{r,echo=FALSE}
+kable(head(CCS$groupedDT))
+```
+
+2. Data integration: code classification
+========================================================
+- **Summarised** grouped data by CCS single level
+```{r,eval=FALSE}
+CCS$summarised_groupedDT
+```
+```{r,echo=FALSE}
+kable(head(CCS$summarised_groupedDT))
+```
+
+2. Data integration: case selection
+========================================================
+- Query the matched cases
+- groupDataType: ccslvl2
+```{r}
+case <- 
+  selectCases(sampleDxFile, ID, ICD, Date, 
+              "2015/10/01", ccslvl2, 
+              caseCondition = "Diseases of the urinary system", 
+              caseCount = 1, 
+              CaseName = "Selected")
+```
+```{r,eval=FALSE}
 case[20:25]
 ```
 ```{r,echo=FALSE}
-case <- selectCases(sampleDxFile, ID, ICD, Date, "2015/10/01", ccslvl2, caseCondition = "Diseases of the urinary system", caseCount = 1, CaseName = "Selected")
 kable(case[20:25])
 ```
 
-Data Integration: patient record period
+2. Data integration: patient record period
 ========================================================
-- Find the first/last admission date for each patient.
+- Get the first/last record date for each patient
+```{r}
+recordDate <- 
+  patientRecordDate(sampleDxFile, ID, ICD, Date)
+```
 ```{r,eval=FALSE}
-admissionDate <- patientRecordDate(sampleDxFile, ID, ICD, Date)
-admissionDate[grep("0$",ID),]
+recordDate
 ```
 ```{r,echo=FALSE}
-admissionDate <- patientRecordDate(sampleDxFile, ID, ICD, Date)
-kable(admissionDate[grep("0$",ID),])
+kable(recordDate[grep("0$",ID),])
 ```
+
+
+2. Data integration: data split
+========================================================
+- Split data by the date of clinical event.
+    - Identify the data is recorded **before** or **after** the clinical event.
+    - Count the number of windows between the record date and index date.
 
 Index date
 ========================================================
-- These records can be used for a given patient as an index date for **data split** function.
+These records can be used for a given patient as an index date for **data split** function.
+```{r}
+indexDateTable <- 
+  data.frame(ID = c("A0","B0","C0","D0"), 
+             indexDate = c("2023-08-12", "2024-02-12",
+                           "2015-12-05", "2017-01-29"),
+             stringsAsFactors = FALSE)
+```
 ```{r,eval=FALSE}
-indexDateTable <- data.frame(ID = c("A0","B0","C0","D0"), indexDate = c("2023-08-12", "2024-02-12","2015-12-05", "2017-01-29"), stringsAsFactors = FALSE)
 indexDateTable
 ```
 ```{r,echo=FALSE}
-indexDateTable <- data.frame(ID = c("A0","B0","C0","D0"), indexDate = c("2023-08-12", "2024-02-12","2015-12-05", "2017-01-29"), stringsAsFactors = FALSE)
 kable(indexDateTable)
 ```
 
-Data Integration: data split
+2. Data integration: data split
 ========================================================
-- Split data by the date of clinical event.
-    - Show the data is recorded **before** or **after** the clinical event.
-    - Count the number of windows between the record date and index date.
-    
-Data Integration: data split
-========================================================    
+- Gap: length of the window. Default set to 30.
+- indexDateFile: indexDateTable
+```{r}
+certainPatient <- 
+  sampleDxFile[grepl("A0|B0|C0|D0",ID),]
+splitedData <- 
+  splitDataByDate(certainPatient, ID, ICD, Date, 
+                  indexDateTable, Gap = 30) 
+```
 ```{r,eval=FALSE}
-certainPatient <- sampleDxFile[grepl("A0|B0|C0|D0",ID),]
-splitedData <- splitDataByDate(certainPatient, ID, ICD, Date, indexDateTable) 
 splitedData[15:19,]
 ```
 ```{r,echo=FALSE}
-certainPatient <- sampleDxFile[grepl("A0|B0|C0|D0",ID),]
-splitedData <- splitDataByDate(certainPatient, ID, ICD, Date, indexDateTable, 30) 
 kable(splitedData[15:19,])
 ```
 
-Data Integration: condition era
+3. EDA preparation
 ========================================================
-- Used to integrate distributed data of clinical records into a single progression record
+type:sub-section
+- Convert the grouped data in long format into a wide format which is fit to others analytical and plotting function
+- In the wide format, the variable can be in numeric and binary form
+- One step method!
+
+3. EDA preparation
+========================================================
+
+```{r}
+wideData <- 
+  groupedDataLongToWide(sampleDxFile, ID, 
+                        ICD, Date, 
+                        "2015-10-01", elix, 
+                        isDescription = F)
+```
 ```{r,eval=FALSE}
-era <- getConditionEra(sampleDxFile, ID, ICD, Date, "2015-10-01", ccs, FALSE)
-head(Era)  
+wideData[,-(2:14))
 ```
 ```{r,echo=FALSE}
-era <- getConditionEra(sampleDxFile, ID, ICD, Date, "2015-10-01", ccs, FALSE)
-kable(head(era))                       
-```
-
-EDA preparation
-========================================================
-- Convert the long format of grouped data into a wide format which is fit to others analytical and plotting packages.
-
-- There are two wide format to select: numeric and binary.
-
-EDA preparation
-========================================================
-
-```{r,eval=FALSE}
-wideData <- groupedDataLongToWide(sampleDxFile, ID, ICD, Date, "2015-10-01", elix, isDescription = F)
-head(wideData[,-(2:14))]
-```
-```{r,echo=FALSE}
-wideData <- groupedDataLongToWide(sampleDxFile, ID, ICD, Date, "2015-10-01", elix, isDescription = F)
-                                          
 kable(head(wideData[,-(2:14)]))
 ```
 
-Visualization
+4. Visualization
 ========================================================
-- The emr package provides two functions to observe the overview of grouped clinical data.
+type:sub-section
+- Visualized the overview of grouped clinical data
    - **Pareto chart** for error ICD list
    - **Histogram plot** for grouped data
  
-Pareto plot for error ICD codes 
+4. Pareto plot for error ICD codes 
 ========================================================
 - Plot for error ICD list
-    - Through first phase function, code standardization, which generates a data of diagnosis codes with potential error.
+- In the first step, code standardization,the output include diagnosis codes with potential error
 ```{r, eval=TRUE, out.width = "35%"}
-plotErrorICD <- plot_errorICD(decimal$Error)
+plotErrorICD <- 
+  plot_errorICD(decimal$Error)
 plotErrorICD$graph
 ```
 
-Pareto plot for error ICD codes 
+4. Pareto plot for error ICD codes 
 ========================================================
-- Top 10 error ICD codes
+- Top 10 ICD codes with errord
 ```{r, eval=FALSE}
 plotErrorICD$ICD
 ```
@@ -515,18 +669,19 @@ plotErrorICD$ICD
 kable(plotErrorICD$ICD)
 ```
 
-Histogram plot for grouped data
+4. Histogram plot for grouped data
 ========================================================
 - Plot of diagnostic categories
-    - An overview of grouping category of the diagnostic code summarizes the percentage of result in histogram plot.
+- Summarizes the percentage of diagnostic categories in a histogram plot
 ```{r, eval=TRUE, out.width = "35%"}
-plotGroupedData <- plot_groupedData(wideData)
+plotGroupedData <- 
+  plot_groupedData(wideData)
 plotGroupedData$graph
 ```
 
-Histogram plot for grouped data
+4. Histogram plot for grouped data
 ========================================================
-- Top 10 diagnostic codes grouped by Elixhauser comorbidity
+Top 10 diagnostic categories grouped by Elixhauser comorbidity
 ```{r, eval=FALSE}
 plotGroupedData$sigCate
 ```
@@ -536,7 +691,7 @@ kable(plotGroupedData$sigCate)
 
 Performance
 ========================================================
-- Dataset: 953,294 unique patients and 7,948,418 admission records.
+- Dataset: 953,294 unique patients with 7,948,418 diagnosis records.
   - Code standardization took 6.2 seconds
   - Data integration (including code standardization):
       - code classification with Charlson comorbidity took 8.5 seconds.
@@ -544,6 +699,20 @@ Performance
   - EDA preparation took 16.5 seconds. 
   - Visualizatoin: histogram plot took 1.0 seconds.
 
+
+More details
+========================================================
+- Geting start
+    - Diagnosis data
+        - English: https://dhlab-cgu.github.io/emr/articles/Eng_Diagnosis.html
+        - 中文: https://dhlab-cgu.github.io/emr/articles/Chi_Diagnosis.html
+
+
+
+
+Procedure data analysis
+========================================================
+type:section
 
 Procedure: code standardzation
 ========================================================
@@ -563,7 +732,7 @@ Procedure: code standardzation
 
 Procedure: sample file
 ========================================================
-- There is also a sample file for procedure record, which has 3 patients and 170 records.
+- Sample file for procedure record, which has 3 patients and 170 records.
 
 ```{r, eval=FALSE}
 samplePrFile[84:88]
@@ -577,24 +746,29 @@ Procedure: code standardization
 - Uniform code format functions:
     - Decimal format: `IcdPrShortToDecimal`
     - Short format: `IcdPrDecimalToShort`
-- Procedure code standardization also has warning message helping users to identify the potential coding error.
+- Procedure code standardization also has warning messages helping users identify the potential coding error.
 
 Procedure: code classification
 ========================================================
-- The functions of related procedure record provide two strategies:  
+- Collapse ICD procedure codes into clinically meaningful categories for further analysis 
+- The functions of grouping procedure record:  
     - CCS
-        - The CCS classification also has single and multiple levels
-        - The usage is similar to the diagnostic CCS classification.
+        - The CCS classification with single and multiple levels
+        - Similar to the diagnostic CCS classification.
     - Procedure class  
    
-    Collapse ICD procedure codes into clinically meaningful categories for further analysis. 
+    
 
 Procedure: code classification
 ========================================================
 
+```{r}
+ProcedureClass <- 
+  IcdPrToProcedureClass(samplePrFile, ID, ICD, 
+                        Date, "2015-10-01")
+```
 ```{r, eval=FALSE}
-ProcedureClass <- IcdPrToProcedureClass(samplePrFile, ID, ICD, Date, "2015-10-01")
-head(ProcedureClass$groupedDT)
+ProcedureClass$groupedDT
 ```
 ```{r, echo=FALSE}
 ProcedureClass <- IcdPrToProcedureClass(samplePrFile, ID, ICD, Date, "2015-10-01")

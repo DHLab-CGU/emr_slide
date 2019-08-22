@@ -132,8 +132,8 @@ library(emr)
 ```
 ```{r setup, include=FALSE}
 if(!require(emr)){
-  if(!reuqire(devtools)){
-    install.packages("devtools")
+  if(!require(devtools)){
+    install.packages("devtools", repos = "http://cran.us.r-project.org")
   }
   devtools::install_github("DHLab-CGU/emr")
   library(emr)
@@ -150,11 +150,11 @@ library(tableone)
 ```
 ```{r setupOther, include=FALSE}
 if(!require(tidyverse)){
-  install.packages("tidyverse")
+  install.packages("tidyverse", repos = "http://cran.us.r-project.org")
   library(tidyverse)
 }
 if(!require(tableone)){
-  install.packages("tableone")
+  install.packages("tableone", repos = "http://cran.us.r-project.org")
   library(tableone)
 }
 ```
@@ -589,10 +589,15 @@ These records can be used for a given patient as an index date for **data split*
 ```{r}
 indexDateTable <- 
   data.frame(ID = c("A0","B0","C0","D0"), 
-             indexDate = c("2023-08-12", "2024-02-12",
-                           "2015-12-05", "2017-01-29"),
+             indexDate = c("2023-08-12", 
+                           "2024-02-12",
+                           "2015-12-05", 
+                           "2017-01-29"),
              stringsAsFactors = FALSE)
 ```
+
+Index date
+========================================================
 ```{r,eval=FALSE}
 indexDateTable
 ```

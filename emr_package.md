@@ -701,10 +701,15 @@ These records can be used for a given patient as an index date for **data split*
 ```r
 indexDateTable <- 
   data.frame(ID = c("A0","B0","C0","D0"), 
-             indexDate = c("2023-08-12", "2024-02-12",
-                           "2015-12-05", "2017-01-29"),
+             indexDate = c("2023-08-12", 
+                           "2024-02-12",
+                           "2015-12-05", 
+                           "2017-01-29"),
              stringsAsFactors = FALSE)
 ```
+
+Index date
+========================================================
 
 ```r
 indexDateTable

@@ -1,23 +1,154 @@
-emr package Introduction
+Diagnosis and procedure data analysis - emr package in R
 ========================================================
-author: Hsiang-Ju Chiu @ Chang Gung University
-date: 2019/08/21
+author: Hsiang-Ju Chiu and Yi-Ju Tseng @ Chang Gung University
+date: 2019/08/22
 autosize: true
 font-family: 'Microsoft JhengHei'
 navigation: slide
 
-Introduction
+Introduction - emr package
 ========================================================
-- The open-source *emr* package aims to expedite an integrated analysis of electronic health records (EHRs). 
+- Provide mechanisms to **integrate**, **analyze**, and **visualize** diagnosis and procedure records
+- Simplifie and accelerate the process of extracting **ready-for-analysis** datasets from EHRs 
 
-- The *emr* package provides mechanisms to analyze, integrate, and visualize clinical data, including diagnosis and procedure records.
+Introduction - emr package
+========================================================
+- An R package 
+- Open-source software on [GitHub](https://github.com/DHLab-CGU/emr)
 
-- The *emr* package simplifies and accelerates the process of extracting ready-for-analysis datasets from EHR databases. 
 
-Material
+You need to install R and RStudio for the first time
+========================================================
+type:section
+
+
+
+R vs. RStudio
 ========================================================
 
-- We provided a sample file `sampleFile_MIMIC` obtained from [MIMIC-III](https://www.nature.com/articles/sdata201635), a medical data set of 7,833 newborn patients with 45,674 admissions.
+[R](https://cloud.r-project.org/) : Core (engine)
+![plot of chunk unnamed-chunk-1](https://www.teslarati.com/wp-content/uploads/2018/07/model-3-drivetrain-1.jpg)
+[Source](https://www.teslarati.com/tesla-patent-more-efficient-electric-motors/)
+
+R vs. RStudio
+========================================================
+
+[RStudio](https://www.rstudio.com/products/rstudio/download/#download) : IDE (dashboard)
+![plot of chunk unnamed-chunk-2](emr_package-figure/dashboard.jpg)
+[Source](https://www.theverge.com/2015/3/19/8260295/tesla-user-interface-redesign-concept)
+
+
+You need to know how to use R and RStudio for the first time
+========================================================
+type:section
+
+RStudio Interface
+========================================================
+left: 30%
+4 Blocks in RStudio：
+
+- Source editor  -> edit the codes here
+- Console -> get the results here
+- environment/...
+- File/Figure/...
+
+***
+
+![plot of chunk unnamed-chunk-3](emr_package-figure/RStudio.png)
+
+R and R Packages
+========================================================
+
+R : Core (iPhone)
+
+![plot of chunk unnamed-chunk-4](https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-xr-white-select-201809?wid=940&hei=1112&fmt=png-alpha&qlt=80&.v=1551226036668)
+
+R and R Packages
+========================================================
+
+R Packages : APP
+
+![plot of chunk unnamed-chunk-5](https://3c.yipee.cc/wp-content/uploads/2019/06/a7ffbaa3df50d7cafe6801a8a8d7a3bf-620x320.jpg)
+
+[Source](https://www.apple.com/)
+
+
+R = Base + Other Packages
+========================================================
+- How to install packages
+
+```r
+install.packages("Package name")
+```
+
+- How to load the installed packages
+
+```r
+library(Package name)
+```
+
+
+Functions - Basic
+========================================================
+- Basic functions
+- Functions provided by packages (such as *emr*)
+- `function_name(argument1,argument2,....)`
+
+For example, we can get the average of numbers by `mean()` function:
+
+```r
+mean(c(1,2,3,4,5,6)) ##averages of 1~6
+```
+
+```
+[1] 3.5
+```
+
+Functions - Arguments
+========================================================
+
+If you don't know the defined order, you can assign the arguments by name
+
+
+```r
+seq(from=1,to=9,by=2)#1~9，每隔2產生一數字
+```
+
+```
+[1] 1 3 5 7 9
+```
+
+
+Back to emr package
+========================================================
+type:section
+
+How to install?
+========================================================
+- Not on CRAN right now
+- Install from GitHub (by *devtools* package)
+
+```r
+install.packages("devtools")
+devtools::install_github("DHLab-CGU/emr")
+library(emr)
+```
+
+
+Other packages used in the tutorial
+========================================================
+
+```r
+install.packages("tidyverse")
+install.packages("tableone")
+library(tidyverse)
+library(tableone)
+```
+
+
+Demo data
+========================================================
+- We provided a sample file `sampleFile_MIMIC` obtained from [MIMIC-III](https://www.nature.com/articles/sdata201635), a medical dataset of 7,833 newborn patients with 45,674 admissions.
 - This dataset used for verifying the comorbidity difference between the patients with **patent ductus arteriosus (PDA)** and the **non-PDA** patients by *emr* package.
 
 ```r
@@ -94,7 +225,7 @@ plot_Elixhauser <- plot_groupedData(elix)
 plot_Elixhauser$graph
 ```
 
-<img src="emr_package-figure/unnamed-chunk-7-1.png" title="plot of chunk unnamed-chunk-7" alt="plot of chunk unnamed-chunk-7" width="50%" />
+<img src="emr_package-figure/unnamed-chunk-16-1.png" title="plot of chunk unnamed-chunk-16" alt="plot of chunk unnamed-chunk-16" width="50%" />
 
 
 Result by emr: significant comorbidity category
@@ -157,7 +288,7 @@ Runtime for result
 
 Overview
 ========================================================
-![plot of chunk unnamed-chunk-12](./overview.jpg)
+![plot of chunk unnamed-chunk-21](./overview.jpg)
 
 
 Data: sample file
@@ -467,7 +598,7 @@ plotErrorICD <- plot_errorICD(decimal$Error)
 plotErrorICD$graph
 ```
 
-<img src="emr_package-figure/unnamed-chunk-35-1.png" title="plot of chunk unnamed-chunk-35" alt="plot of chunk unnamed-chunk-35" width="35%" />
+<img src="emr_package-figure/unnamed-chunk-44-1.png" title="plot of chunk unnamed-chunk-44" alt="plot of chunk unnamed-chunk-44" width="35%" />
 
 Pareto plot for error ICD codes 
 ========================================================
@@ -501,7 +632,7 @@ plotGroupedData <- plot_groupedData(wideData)
 plotGroupedData$graph
 ```
 
-<img src="emr_package-figure/unnamed-chunk-38-1.png" title="plot of chunk unnamed-chunk-38" alt="plot of chunk unnamed-chunk-38" width="35%" />
+<img src="emr_package-figure/unnamed-chunk-47-1.png" title="plot of chunk unnamed-chunk-47" alt="plot of chunk unnamed-chunk-47" width="35%" />
 
 Histogram plot for grouped data
 ========================================================
@@ -603,13 +734,13 @@ head(ProcedureClass$groupedDT)
 |0205  |B  |0205  |2008-07-06 |Major Therapeutic    |
 |8812  |B  |8812  |2007-06-27 |Minor Diagnostic     |
 
-More Detail
+More details
 ========================================================
 - Geting start
-    - Diagnostic part
+    - Diagnosis data
         - English: https://dhlab-cgu.github.io/emr/articles/Eng_Diagnosis.html
-        - Chinese: https://dhlab-cgu.github.io/emr/articles/Chi_Diagnosis.html
-    - Procedure part
+        - 中文: https://dhlab-cgu.github.io/emr/articles/Chi_Diagnosis.html
+    - Procedure data
         - English: https://dhlab-cgu.github.io/emr/articles/Eng_Procedure.html
-        - Chinese: https://dhlab-cgu.github.io/emr/articles/Chi_Procedure.html
+        - 中文: https://dhlab-cgu.github.io/emr/articles/Chi_Procedure.html
 

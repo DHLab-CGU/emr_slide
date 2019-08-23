@@ -49,7 +49,7 @@ left: 40%
 
 - Source editor  -> edit the codes here
 - Console -> get the results here
-- environment/...
+- Environment/...
 - File/Figure/...
 
 ***
@@ -666,7 +666,7 @@ case[20:25]
 |B2 |Selected     |     6|2016-03-20    |2024-09-20  |3106 days |N189          |                  1|
 |C0 |non-Selected |    NA|NA            |NA          |NA        |NA            |                 NA|
 
-2. Data integration: patient record period
+2. Data integration: record period  
 ========================================================
 - Get the first/last record date for each patient
 
@@ -687,12 +687,149 @@ recordDate
 |B0  |2015-12-26      |2024-02-12    |
 |D0  |2017-01-29      |2025-04-08    |
 
+Steps to accomplish the goals (PDA case)
+========================================================
+1. Select PDA case
+
+1-1. **Wash-out** and **follow-up** period   <-----
+
+2. Group diagnosis records
+3. Visualize the diagnosis records
+4. Generate "Table 1" for the analysis
+
+2. Data integration: record period + case selection 
+========================================================
+- Wash-out: period of records before the index date (for example, the first **Diseases of the urinary system** diagnosis)
+- Follow-up: period of records after the index date
+
+```r
+WFPeriod<-merge(case,recordDate,by="ID")
+```
+
+```r
+WFPeriod[,list(ID,firstCaseDate,endCaseDate,
+                     firstRecordDate,endRecordDate)]
+```
+
+|ID  |firstCaseDate |endCaseDate |firstRecordDate |endRecordDate |
+|:---|:-------------|:-----------|:---------------|:-------------|
+|A0  |2009-07-25    |2013-12-20  |2009-07-25      |2023-08-12    |
+|A1  |2006-11-29    |2014-09-24  |2006-11-29      |2014-09-24    |
+|A10 |2007-11-04    |2012-07-30  |2007-11-04      |2023-03-11    |
+|A11 |2008-03-09    |2011-09-03  |2008-03-09      |2019-11-17    |
+|A12 |2006-05-14    |2015-06-29  |2006-01-12      |2022-06-12    |
+|A13 |2006-04-29    |2025-02-02  |2006-04-29      |2025-02-02    |
+|A14 |2006-11-28    |2014-12-21  |2006-11-28      |2023-07-05    |
+|A15 |2007-05-25    |2023-05-12  |2007-05-25      |2023-05-12    |
+|A16 |2007-04-15    |2014-12-05  |2007-04-15      |2025-05-13    |
+|A17 |2007-02-19    |2014-07-03  |2007-02-19      |2014-07-03    |
+|A18 |2007-04-05    |2014-03-04  |2007-04-05      |2014-03-04    |
+|A2  |2011-09-20    |2020-05-22  |2011-09-20      |2020-05-22    |
+|A3  |2008-07-08    |2014-02-24  |2008-07-08      |2018-10-03    |
+|A4  |2006-10-20    |2015-03-09  |2006-10-20      |2024-12-11    |
+|A5  |2009-09-10    |2020-01-24  |2009-09-10      |2020-01-24    |
+|A6  |2007-10-01    |2015-07-12  |2007-10-01      |2022-06-11    |
+|A7  |2007-02-01    |2014-08-14  |2007-02-01      |2024-01-19    |
+|A8  |2007-11-22    |2015-10-27  |2007-11-22      |2016-05-12    |
+|A9  |2007-03-05    |2013-11-09  |2006-06-30      |2023-12-10    |
+|B0  |2015-12-26    |2024-02-12  |2015-12-26      |2024-02-12    |
+|B1  |2016-08-08    |2024-03-04  |2014-06-30      |2024-03-04    |
+|B2  |2016-03-20    |2024-09-20  |2016-03-20      |2024-09-20    |
+|B3  |2019-05-07    |2025-05-25  |2012-12-24      |2025-05-25    |
+|B4  |2015-12-02    |2025-07-21  |2007-11-19      |2025-07-21    |
+|C0  |NA            |NA          |2015-12-05      |2025-02-21    |
+|C1  |NA            |NA          |2010-12-03      |2025-02-20    |
+|C2  |NA            |NA          |2009-12-16      |2025-09-17    |
+|C3  |NA            |NA          |2014-03-26      |2024-02-07    |
+|C4  |NA            |NA          |2015-11-23      |2025-09-05    |
+|D0  |NA            |NA          |2017-01-29      |2025-04-08    |
+|D1  |NA            |NA          |2006-02-12      |2024-04-04    |
+|D2  |NA            |NA          |2006-09-01      |2025-08-11    |
+|D3  |NA            |NA          |2013-03-14      |2024-01-27    |
+|D4  |NA            |NA          |2007-09-23      |2022-04-04    |
+|D5  |NA            |NA          |2013-07-16      |2023-07-28    |
+|D6  |NA            |NA          |2005-10-09      |2025-01-05    |
+|D7  |NA            |NA          |2007-05-22      |2021-12-03    |
+|D8  |NA            |NA          |2007-01-30      |2025-09-10    |
+
+
+2. Data integration: record period + case selection 
+========================================================
+
+```r
+WFPeriod$Washout<-
+  WFPeriod$firstCaseDate-WFPeriod$firstRecordDate
+WFPeriod$Followup<-
+  WFPeriod$endRecordDate-WFPeriod$firstCaseDate
+```
+
+```r
+WFPeriod[,list(ID,firstCaseDate,endCaseDate,
+               firstRecordDate,endRecordDate,
+               Washout,Followup)]
+```
+
+|ID  |firstCaseDate |endCaseDate |firstRecordDate |endRecordDate |Washout   |Followup  |
+|:---|:-------------|:-----------|:---------------|:-------------|:---------|:---------|
+|A0  |2009-07-25    |2013-12-20  |2009-07-25      |2023-08-12    |0 days    |5131 days |
+|A1  |2006-11-29    |2014-09-24  |2006-11-29      |2014-09-24    |0 days    |2856 days |
+|A10 |2007-11-04    |2012-07-30  |2007-11-04      |2023-03-11    |0 days    |5606 days |
+|A11 |2008-03-09    |2011-09-03  |2008-03-09      |2019-11-17    |0 days    |4270 days |
+|A12 |2006-05-14    |2015-06-29  |2006-01-12      |2022-06-12    |122 days  |5873 days |
+|A13 |2006-04-29    |2025-02-02  |2006-04-29      |2025-02-02    |0 days    |6854 days |
+|A14 |2006-11-28    |2014-12-21  |2006-11-28      |2023-07-05    |0 days    |6063 days |
+|A15 |2007-05-25    |2023-05-12  |2007-05-25      |2023-05-12    |0 days    |5831 days |
+|A16 |2007-04-15    |2014-12-05  |2007-04-15      |2025-05-13    |0 days    |6603 days |
+|A17 |2007-02-19    |2014-07-03  |2007-02-19      |2014-07-03    |0 days    |2691 days |
+|A18 |2007-04-05    |2014-03-04  |2007-04-05      |2014-03-04    |0 days    |2525 days |
+|A2  |2011-09-20    |2020-05-22  |2011-09-20      |2020-05-22    |0 days    |3167 days |
+|A3  |2008-07-08    |2014-02-24  |2008-07-08      |2018-10-03    |0 days    |3739 days |
+|A4  |2006-10-20    |2015-03-09  |2006-10-20      |2024-12-11    |0 days    |6627 days |
+|A5  |2009-09-10    |2020-01-24  |2009-09-10      |2020-01-24    |0 days    |3788 days |
+|A6  |2007-10-01    |2015-07-12  |2007-10-01      |2022-06-11    |0 days    |5367 days |
+|A7  |2007-02-01    |2014-08-14  |2007-02-01      |2024-01-19    |0 days    |6196 days |
+|A8  |2007-11-22    |2015-10-27  |2007-11-22      |2016-05-12    |0 days    |3094 days |
+|A9  |2007-03-05    |2013-11-09  |2006-06-30      |2023-12-10    |248 days  |6124 days |
+|B0  |2015-12-26    |2024-02-12  |2015-12-26      |2024-02-12    |0 days    |2970 days |
+|B1  |2016-08-08    |2024-03-04  |2014-06-30      |2024-03-04    |770 days  |2765 days |
+|B2  |2016-03-20    |2024-09-20  |2016-03-20      |2024-09-20    |0 days    |3106 days |
+|B3  |2019-05-07    |2025-05-25  |2012-12-24      |2025-05-25    |2325 days |2210 days |
+|B4  |2015-12-02    |2025-07-21  |2007-11-19      |2025-07-21    |2935 days |3519 days |
+|C0  |NA            |NA          |2015-12-05      |2025-02-21    |NA        |NA        |
+|C1  |NA            |NA          |2010-12-03      |2025-02-20    |NA        |NA        |
+|C2  |NA            |NA          |2009-12-16      |2025-09-17    |NA        |NA        |
+|C3  |NA            |NA          |2014-03-26      |2024-02-07    |NA        |NA        |
+|C4  |NA            |NA          |2015-11-23      |2025-09-05    |NA        |NA        |
+|D0  |NA            |NA          |2017-01-29      |2025-04-08    |NA        |NA        |
+|D1  |NA            |NA          |2006-02-12      |2024-04-04    |NA        |NA        |
+|D2  |NA            |NA          |2006-09-01      |2025-08-11    |NA        |NA        |
+|D3  |NA            |NA          |2013-03-14      |2024-01-27    |NA        |NA        |
+|D4  |NA            |NA          |2007-09-23      |2022-04-04    |NA        |NA        |
+|D5  |NA            |NA          |2013-07-16      |2023-07-28    |NA        |NA        |
+|D6  |NA            |NA          |2005-10-09      |2025-01-05    |NA        |NA        |
+|D7  |NA            |NA          |2007-05-22      |2021-12-03    |NA        |NA        |
+|D8  |NA            |NA          |2007-01-30      |2025-09-10    |NA        |NA        |
 
 2. Data integration: data split
 ========================================================
 - Split data by the date of clinical event.
     - Identify the data is recorded **before** or **after** the clinical event.
     - Count the number of windows between the record date and index date.
+
+
+Steps to accomplish the goals (PDA case)
+========================================================
+1. Select PDA case
+
+1-1. Wash-out and follow-up period
+
+2. Group diagnosis records
+
+2-1. Diagnosis **before** and **after** an **important event**   <-----
+
+3. Visualize the diagnosis records
+4. Generate "Table 1" for the analysis
+
 
 Index date
 ========================================================
@@ -710,6 +847,7 @@ indexDateTable <-
 
 Index date
 ========================================================
+The **important event**, could be the first diagnosis date or treatment date
 
 ```r
 indexDateTable
@@ -747,16 +885,29 @@ splitedData[15:19,]
 |C0 |C671 |2015-12-05 |2015-12-05 |A       |      1|
 |C0 |C048 |2016-07-05 |2015-12-05 |A       |      8|
 
+2. Data integration: data split
+========================================================
+Diagnosis 180 days **before** the **index date**
+
+```r
+splitedData[timeTag=="B"&window<=6,]
+```
+
+|ID |ICD  |Date       |indexDate  |timeTag | window|
+|:--|:----|:----------|:----------|:-------|------:|
+|B0 |N183 |2023-08-28 |2024-02-12 |B       |      6|
+|B0 |N19  |2023-11-18 |2024-02-12 |B       |      3|
+
 3. EDA preparation
 ========================================================
 type:sub-section
 - Convert the grouped data in long format into a wide format which is fit to others analytical and plotting function
 - In the wide format, the variable can be in numeric and binary form
-- One step method!
+- **One step method!**
 
 3. EDA preparation
 ========================================================
-
+- DxDataFile: can be original data or splited and filtered data
 
 ```r
 wideData <- 
@@ -797,7 +948,7 @@ plotErrorICD <-
 plotErrorICD$graph
 ```
 
-<img src="emr_package-figure/unnamed-chunk-67-1.png" title="plot of chunk unnamed-chunk-67" alt="plot of chunk unnamed-chunk-67" width="35%" />
+<img src="emr_package-figure/unnamed-chunk-75-1.png" title="plot of chunk unnamed-chunk-75" alt="plot of chunk unnamed-chunk-75" width="35%" />
 
 4. Pareto plot for error ICD codes 
 ========================================================
@@ -832,7 +983,7 @@ plotGroupedData <-
 plotGroupedData$graph
 ```
 
-<img src="emr_package-figure/unnamed-chunk-70-1.png" title="plot of chunk unnamed-chunk-70" alt="plot of chunk unnamed-chunk-70" width="35%" />
+<img src="emr_package-figure/unnamed-chunk-78-1.png" title="plot of chunk unnamed-chunk-78" alt="plot of chunk unnamed-chunk-78" width="35%" />
 
 4. Histogram plot for grouped data
 ========================================================

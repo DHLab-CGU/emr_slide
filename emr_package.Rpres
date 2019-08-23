@@ -53,7 +53,7 @@ left: 40%
 
 - Source editor  -> edit the codes here
 - Console -> get the results here
-- environment/...
+- Environment/...
 - File/Figure/...
 
 ***
@@ -562,7 +562,7 @@ case[20:25]
 kable(case[20:25])
 ```
 
-2. Data integration: patient record period
+2. Data integration: record period  
 ========================================================
 - Get the first/last record date for each patient
 ```{r}
@@ -576,12 +576,72 @@ recordDate
 kable(recordDate[grep("0$",ID),])
 ```
 
+Steps to accomplish the goals (PDA case)
+========================================================
+1. Select PDA case
+
+1-1. **Wash-out** and **follow-up** period   <-----
+
+2. Group diagnosis records
+3. Visualize the diagnosis records
+4. Generate "Table 1" for the analysis
+
+2. Data integration: record period + case selection 
+========================================================
+- Wash-out: period of records before the index date (for example, the first **Diseases of the urinary system** diagnosis)
+- Follow-up: period of records after the index date
+```{r}
+WFPeriod<-merge(case,recordDate,by="ID")
+```
+```{r,eval=FALSE}
+WFPeriod[,list(ID,firstCaseDate,endCaseDate,
+                     firstRecordDate,endRecordDate)]
+```
+```{r,echo=FALSE}
+kable(WFPeriod[,list(ID,firstCaseDate,endCaseDate,
+                     firstRecordDate,endRecordDate)])
+```
+
+
+2. Data integration: record period + case selection 
+========================================================
+```{r}
+WFPeriod$Washout<-
+  WFPeriod$firstCaseDate-WFPeriod$firstRecordDate
+WFPeriod$Followup<-
+  WFPeriod$endRecordDate-WFPeriod$firstCaseDate
+```
+```{r,eval=FALSE}
+WFPeriod[,list(ID,firstCaseDate,endCaseDate,
+               firstRecordDate,endRecordDate,
+               Washout,Followup)]
+```
+```{r,echo=FALSE}
+kable(WFPeriod[,list(ID,firstCaseDate,endCaseDate,
+               firstRecordDate,endRecordDate,
+               Washout,Followup)])
+```
 
 2. Data integration: data split
 ========================================================
 - Split data by the date of clinical event.
     - Identify the data is recorded **before** or **after** the clinical event.
     - Count the number of windows between the record date and index date.
+
+
+Steps to accomplish the goals (PDA case)
+========================================================
+1. Select PDA case
+
+1-1. Wash-out and follow-up period
+
+2. Group diagnosis records
+
+2-1. Diagnosis **before** and **after** an **important event**   <-----
+
+3. Visualize the diagnosis records
+4. Generate "Table 1" for the analysis
+
 
 Index date
 ========================================================
@@ -598,6 +658,7 @@ indexDateTable <-
 
 Index date
 ========================================================
+The **important event**, could be the first diagnosis date or treatment date
 ```{r,eval=FALSE}
 indexDateTable
 ```
@@ -623,16 +684,26 @@ splitedData[15:19,]
 kable(splitedData[15:19,])
 ```
 
+2. Data integration: data split
+========================================================
+Diagnosis 180 days **before** the **index date**
+```{r,eval=FALSE}
+splitedData[timeTag=="B"&window<=6,]
+```
+```{r,echo=FALSE}
+kable(splitedData[timeTag=="B"&window<=6,])
+```
+
 3. EDA preparation
 ========================================================
 type:sub-section
 - Convert the grouped data in long format into a wide format which is fit to others analytical and plotting function
 - In the wide format, the variable can be in numeric and binary form
-- One step method!
+- **One step method!**
 
 3. EDA preparation
 ========================================================
-
+- DxDataFile: can be original data or splited and filtered data
 ```{r}
 wideData <- 
   groupedDataLongToWide(sampleDxFile, ID, 
